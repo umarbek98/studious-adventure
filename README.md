@@ -65,21 +65,11 @@ Then, run the migrations and seed file:
 
 ```console
 flask db upgrade
-python app/seed.py
+python seed.py
 ```
 
 > If you aren't able to get the provided seed file working, you are welcome to
 > generate your own seed data to test the application.
-
-## Validations
-
-Add validations to the `HeroPower` model:
-
-- `strength` must be one of the following values: 'Strong', 'Weak', 'Average'
-
-Add validations to the `Power` model:
-
-- `description` must be present and at least 20 characters long
 
 ## Routes
 
@@ -256,3 +246,13 @@ JSON data, along with the appropriate HTTP status code:
   "error": "Invalid input"
 }
 ```
+
+## Validations (Stretch Goal)
+
+Add validations to the `HeroPower` model:
+
+- `strength` must be one of the following values: 'Strong', 'Weak', 'Average'
+
+Add validations to the `Power` model:
+
+- `description` must be present and at least 20 characters long
