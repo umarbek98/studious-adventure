@@ -10,10 +10,8 @@ metadata = MetaData(naming_convention={
 
 db = SQLAlchemy(metadata=metadata)
 
-class Hero(db.Model, SerializerMixin):
+class Hero(db.Model):
     __tablename__ = 'heroes'
-
-    serialize_rules = ('-powers.heroes', '-hero_powers.hero')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -22,14 +20,21 @@ class Hero(db.Model, SerializerMixin):
     hero_powers = db.relationship('HeroPower', backref='hero')
     powers = association_proxy('hero_powers', 'power',
         creator=lambda pwr: HeroPower(power=pwr))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'super_name': self.super_name,
+            'powers': [p.to_dict() for p in self.powers]
+        }
+    
 
     def __repr__(self):
         return f'<Hero {self.id}>'
     
-class Power(db.Model, SerializerMixin):
+class Power(db.Model):
     __tablename__ = 'powers'
-
-    seralize_rules = ('-heroes.powers', '-hero_powers.power')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -39,19 +44,18 @@ class Power(db.Model, SerializerMixin):
     heroes = association_proxy('hero_powers', 'hero',
         creator=lambda hr: HeroPower(hero=hr))
     
-    @validates('description')
-    def validate_description(self, key, description):
-        if isinstance(description, str) and len(description) >= 20:
-            return description
-        raise ValueError("Description must be string of 20+ characters.")
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description
+        }
 
     def __repr__(self):
         return f'<Power {self.id}>'
     
-class HeroPower(db.Model, SerializerMixin):
+class HeroPower(db.Model):
     __tablename__ = 'hero_powers'
-
-    serialize_rules = ('-power.hero_powers', '-hero.hero_powers')
 
     id = db.Column(db.Integer, primary_key=True)
     strength = db.Column(db.String)
@@ -59,11 +63,13 @@ class HeroPower(db.Model, SerializerMixin):
     hero_id = db.Column(db.Integer, db.ForeignKey('heroes.id'))
     power_id = db.Column(db.Integer, db.ForeignKey('powers.id'))
 
-    @validates('strength')
-    def validate_strength(self, key, strength):
-        if strength in ('Strong', 'Weak', 'Average'):
-            return strength
-        raise ValueError("Strength must be 'Strong', 'Weak', or 'Average'.")
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'strength': self.strength,
+            'hero_id': self.hero_id,
+            'power_id': self.power_id
+        }
 
     def __repr__(self):
         return f'<HeroPower {self.id}>'
