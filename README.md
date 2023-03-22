@@ -192,7 +192,7 @@ the appropriate HTTP status code:
 }
 ```
 
-If the `Power` is **not** updated successfully (does not pass validations),
+**STRETCH GOAL:** If the `Power` is **not** updated successfully (does not pass validations),
 return the following JSON data, along with the appropriate HTTP status code:
 
 ```json
@@ -238,7 +238,7 @@ related to the `Hero`:
 }
 ```
 
-If the `HeroPower` is **not** created successfully, return the following
+**STRETCH GOAL:** If the `HeroPower` is **not** created successfully, return the following
 JSON data, along with the appropriate HTTP status code:
 
 ```json
