@@ -18,25 +18,77 @@ db.init_app(app)
 def home():
     return ''
 
-@app.route('/heroes')
+@app.route('/heroes', methods = ['GET'])
 def heroes():
-    return ''
+    all_heroes = Hero.query.all()
+    heroes_dict = [hero.to_dict() for hero in all_heroes]
+    if request.method == 'GET':
+        return make_response(jsonify(heroes_dict), 200)
 
-@app.route('/heroes/<int:id>')
+@app.route('/heroes/<int:id>', methods = ['GET'])
 def hero_by_id(id):
-    return ''
+    hero = Hero.query.filter(Hero.id == id).first()
 
-@app.route('/powers')
+    if not hero:
+        return make_response(jsonify({"error": "Hero not found"}))
+    
+    if request.method == 'GET':
+        return make_response(jsonify(hero.to_dict()),200)
+    
+
+@app.route('/powers', methods = ['GET'])
 def powers():
-    return ''
+    all_powers = Power.query.all()
+    powers_dict = [power.to_dict() for power in all_powers]
 
-@app.route('/powers/<int:id>')
+    if request.method == 'GET':
+        return make_response(jsonify(powers_dict), 200)
+
+@app.route('/powers/<int:id>', methods = ['GET', 'PATCH'])
 def power_by_id(id):
-    return ''
+    power = Power.query.filter(Power.id == id).first()
 
-@app.route('/hero_powers')
+    if not power:
+        return make_response(jsonify({"error": "Power not found"}))
+    
+    if request.method == 'GET':
+        return make_response(jsonify(power.to_dict()))
+    
+    elif request.method == 'PATCH':
+        data = request.get_json()
+        
+        if not power:
+            return make_response(jsonify({"error": "Power not found"}))
+        
+        for field in data:
+            setattr(power, field, data[field])
+        if len(power.description) < 20:
+            return make_response({"error": "Invalid input: length must be >=20"})
+        else:
+            db.session.add(power)
+            db.session.commit()
+            return make_response(jsonify(power.to_dict()), 200)
+
+@app.route('/hero_powers', methods = ['GET', 'POST'])
 def hero_powers():
-    return ''
+    hp = HeroPower.query.all()
+    hp_dict = [power.to_dict() for power in hp]
+
+    if request.method == 'GET':
+        return make_response(jsonify(hp_dict), 200)
+    
+    elif request.method == 'POST':
+        data = request.get_json()
+        new_hp = HeroPower()
+
+        for field in data:
+            setattr(new_hp, field, data[field])
+        if new_hp.strength != 'Strong' and new_hp.strength != 'Weak' and new_hp.strength != 'Average':
+            return make_response(jsonify({"error": "Invalid input"}))
+        else:
+            db.session.add(new_hp)
+            db.session.commit()
+            return make_response(jsonify(new_hp.hero.to_dict()), 201)
 
 
 if __name__ == '__main__':
